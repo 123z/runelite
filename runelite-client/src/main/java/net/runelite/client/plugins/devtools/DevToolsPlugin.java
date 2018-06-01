@@ -78,6 +78,12 @@ public class DevToolsPlugin extends Plugin
 	private SceneOverlay sceneOverlay;
 
 	@Inject
+	private CameraOverlay cameraOverlay;
+
+	@Inject
+	private WorldMapLocationOverlay worldMapLocationOverlay;
+
+	@Inject
 	private EventBus eventBus;
 
 	private boolean togglePlayers;
@@ -95,6 +101,8 @@ public class DevToolsPlugin extends Plugin
 	private boolean toggleValidMovement;
 	private boolean toggleLineOfSight;
 	private boolean toggleGraphicsObjects;
+	private boolean toggleCamera;
+	private boolean toggleWorldMapLocation;
 
 	Widget currentWidget;
 	int itemIndex = -1;
@@ -120,8 +128,9 @@ public class DevToolsPlugin extends Plugin
 		}
 
 		navButton = NavigationButton.builder()
-			.name("Developer Tools")
+			.tooltip("Developer Tools")
 			.icon(icon)
+			.priority(1)
 			.panel(panel)
 			.build();
 
@@ -140,7 +149,7 @@ public class DevToolsPlugin extends Plugin
 	@Override
 	public Collection<Overlay> getOverlays()
 	{
-		return Arrays.asList(overlay, locationOverlay, sceneOverlay);
+		return Arrays.asList(overlay, locationOverlay, sceneOverlay, cameraOverlay, worldMapLocationOverlay);
 	}
 
 	@Subscribe
@@ -173,7 +182,7 @@ public class DevToolsPlugin extends Plugin
 			case "getvar":
 			{
 				int varbit = Integer.parseInt(args[0]);
-				int value = client.getVarbitValue(varbit);
+				int value = client.getVarbitValue(client.getVarps(), varbit);
 				client.addChatMessage(ChatMessageType.SERVER, "", "Varbit " + varbit + ": " + value, null);
 				break;
 			}
@@ -181,7 +190,7 @@ public class DevToolsPlugin extends Plugin
 			{
 				int varbit = Integer.parseInt(args[0]);
 				int value = Integer.parseInt(args[1]);
-				client.setVarbitValue(varbit, value);
+				client.setVarbitValue(client.getVarps(), varbit, value);
 				client.addChatMessage(ChatMessageType.SERVER, "", "Set varbit " + varbit + " to " + value, null);
 				eventBus.post(new VarbitChanged()); // fake event
 				break;
@@ -307,6 +316,16 @@ public class DevToolsPlugin extends Plugin
 		toggleGraphicsObjects = !toggleGraphicsObjects;
 	}
 
+	void toggleCamera()
+	{
+		toggleCamera = !toggleCamera;
+	}
+
+	void toggleWorldMapLocation()
+	{
+		toggleWorldMapLocation = !toggleWorldMapLocation;
+	}
+
 	boolean isTogglePlayers()
 	{
 		return togglePlayers;
@@ -380,5 +399,15 @@ public class DevToolsPlugin extends Plugin
 	boolean isToggleGraphicsObjects()
 	{
 		return toggleGraphicsObjects;
+	}
+
+	boolean isToggleCamera()
+	{
+		return toggleCamera;
+	}
+
+	boolean isToggleWorldMapLocation()
+	{
+		return toggleWorldMapLocation;
 	}
 }
